@@ -26,12 +26,7 @@ function usePromises(method) {
 }
 
 function copyFiles(source, target) {
-	return isDirectory(target)
-		.then((exists) => {
-			if (!exists) {
-				return mkdir(target)
-			}
-		})
+	return makeTarget(target)
 		.then(() => {
 			return readdir(source)
 		})
@@ -57,6 +52,17 @@ function copyFiles(source, target) {
 			console.error('failed')
 			console.log(error)
 			return Promise.reject(error)
+		})
+}
+
+function makeTarget(target) {
+	return isDirectory(target)
+		.then(exists => {
+			if (!exists) {
+				const targetParent = path.dirname(target)
+				return makeTarget(targetParent)
+					.then(() => mkdir(target))
+			}
 		})
 }
 
