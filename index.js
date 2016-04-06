@@ -67,15 +67,19 @@ function copyFiles(source, target) {
 
 // Recursively build the target directory
 function makeTarget(target) {
-	return isDirectory(target)
-		.then(exists => {
-			if (!exists) {
-				const targetParent = path.dirname(target)
-				// Build the parent directory if it does not exist
-				return makeTarget(targetParent)
-					.then(() => mkdir(target)) // Make the target directory
-			}
-		})
+	if (target == null) {
+		return Promise.reject(`Target directory can't be resolved`)
+	} else {
+		return isDirectory(target)
+			.then(exists => {
+				if (!exists) {
+					const targetParent = path.dirname(target)
+					// Build the parent directory if it does not exist
+					return makeTarget(targetParent)
+						.then(() => mkdir(target)) // Make the target directory
+				}
+			})
+	}
 }
 
 // Like array.prototype.filter but supports async predicate
