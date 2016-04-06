@@ -1,5 +1,5 @@
 {
-  "name": "promises",
+  "name": "promise-chaining",
   "version": "1.0.0",
   "description": "Describe promise chains",
   "main": "index.js",
