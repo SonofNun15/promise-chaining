@@ -8,8 +8,10 @@ const readFile = usePromises(fs.readFile)
 const writeFile = usePromises(fs.writeFile)
 
 function usePromises(method) {
+	// Return a function that returns a promise
 	return (...args) => {
 		return new Promise((resolve, reject) => {
+			// When the callback is called, resolve or reject the promise
 			const callback = (err, ...results) => {
 				if (err != null) {
 					reject(err)
@@ -18,6 +20,7 @@ function usePromises(method) {
 				}
 			}
 
+			// Add the callback to the end of the arguments and call the underlying method
 			const argsWithCallback = args.concat([callback])
 
 			method(...argsWithCallback)
@@ -26,25 +29,32 @@ function usePromises(method) {
 }
 
 function copyFiles(source, target) {
+	// Create the target directory
 	return makeTarget(target)
 		.then(() => {
+			// Read the contest of the source directory
 			return readdir(source)
 		})
 		.then((items) => {
+			// Get list of transfer objects with source and target
 			const files = items.map((item) => {
 				return {
 					source: path.join(source, item),
 					target: path.join(target, item),
 				}
 			})
+
+			// Eliminate items in directory that are not files
 			return filter(files, (file) => isFile(file.source))
 		})
 		.then((files) => {
 			return Promise.all(
+				// Read the contents of each file
 				files.map((file) => readFile(file.source))
 			)
 				.then((fileContents) => {
 					return Promise.all(
+						// Write the contents of each file into target
 						fileContents.map((contents, index) => writeFile(files[index].target, contents))
 					)
 				})
@@ -55,13 +65,15 @@ function copyFiles(source, target) {
 		})
 }
 
+// Recursively build the target directory
 function makeTarget(target) {
 	return isDirectory(target)
 		.then(exists => {
 			if (!exists) {
 				const targetParent = path.dirname(target)
+				// Build the parent directory if it does not exist
 				return makeTarget(targetParent)
-					.then(() => mkdir(target))
+					.then(() => mkdir(target)) // Make the target directory
 			}
 		})
 }
